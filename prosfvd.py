@@ -24,8 +24,7 @@ now = time.localtime()
 fifoPipe = os.path.abspath(config.get("io", "fifoPipe"))
 ftpBase = os.path.abspath(config.get("io", "ftpBase"))
 logLevel = config.get("log", "level")
-trigger = [x.strip().upper() for x in str(config.get("io", "trigger")).split(",")]
-log = logger.getLogger("tsfvpy", logLevel)
+log = logger.getLogger("prosfvd", logLevel)
 que = queue.Queue()
 running = True
 
@@ -56,26 +55,28 @@ def daemon(pipe):
             with open(pipe, "r") as p:
                 newFifo = p.readline()
                 # log.debug("new fifo entry: " + newFifo)
-                fifoSplit = newFifo.split("|")
+                fifoSplit = newFifo.split(" ")
+                log.debug(fifoSplit)
 
-                if fifoSplit[0] in trigger:
-                    log.debug("triggered: '" + str(fifoSplit) + "'")
-                    path = os.path.abspath(ftpBase+""+fifoSplit[2].strip())
-                    # log.debug("-----------------------")
-                    # log.debug(os.path.abspath(fifoSplit[2].strip()))
-                    # log.debug(os.path.abspath(ftpBase))
-                    # log.debug(os.path.abspath(ftpBase+""+fifoSplit[2].strip()))
-                    # log.debug("-----------------------")
-                    args = fifoSplit[1].strip()
+                if fifoSplit[0] == "STOR":
+                    path = os.path.abspath(fifoSplit[2].strip())
 
-                    if fifoSplit[0].lower() == "site tsfv":
-                        args = args.split(" ")
-                        if args[0].lower() == "tsfv":
-                            log.debug("adding to queue for recheck...")
-                            que.put(path)
-                    else:
-                        log.debug("adding to queue...")
-                        que.put(os.path.join(path, args))
+                    log.debug("new file stored: '" + path + "'")
+
+                elif fifoSplit[0] == "SITE SFV":
+
+                    log.debug("new site command issued: '" + fifoSplit + "'")
+
+                    # args = fifoSplit[1].strip()
+                    #
+                    # if fifoSplit[0].lower() == "site sfv":
+                    #     args = args.split(" ")
+                    #     if args[0].lower() == "tsfv":
+                    #         log.debug("adding to queue for recheck...")
+                    #         que.put(path)
+                    # else:
+                    #     log.debug("adding to queue...")
+                    #     que.put(os.path.join(path, args))
 
     except:
         log.debug("Unexpected error in daemon loop: " + str(sys.exc_info()[0]))
@@ -85,6 +86,7 @@ def daemon(pipe):
 def main(argv=None):
     log.debug("starting...")
     daemon(fifoPipe)
+
 
 if __name__ == '__main__':
     sys.exit(main())
