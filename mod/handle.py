@@ -1,7 +1,6 @@
 import fnmatch
 import os
 import configparser
-from mod import hashing
 from mod import logger
 
 ## vars
@@ -51,15 +50,6 @@ def getFormattedBroken(filePath):
 
 
 def getFormattedStatus(cntTotal, cntMissing, cntBroken):
-    ### status = [ Complete: {4}%% ({1} of {0}) | Missing: {5}%% ({2} of {0}) | Broken: {6}%% ({3} of {0}) ]
-    # Total......................{0}
-    # Complete...................{1}
-    # Missing....................{2}
-    # Broken.....................{3}
-    # %Complete..................{4}
-    # %Missing...................{5}
-    # %Broken....................{6}
-
     cntComplete = (cntTotal - cntMissing - cntBroken)
     pctComplete = (cntComplete / cntTotal) * 100
     pctMissing = (cntMissing / cntTotal) * 100
@@ -69,14 +59,18 @@ def getFormattedStatus(cntTotal, cntMissing, cntBroken):
 
 
 def show(filePath):
+    log.debug("showing status in: '" + os.path.dirname(filePath) + "'")
     cntTotal = 0
     cntMissing = 0
     cntBroken = 0
     sfv = parseSfv(filePath)
 
     for key in sfv.keys():
-        missing = getFormattedMissing(key)
-        broken = getFormattedBroken(key)
+        tmp = os.path.join(os.path.dirname(filePath), key)
+        missing = getFormattedMissing(tmp)
+        broken = getFormattedBroken(tmp)
+
+        log.debug("missing: " + missing + " exists: " + str(os.path.exists(missing)))
 
         if os.path.exists(missing):
             cntMissing += 1
@@ -95,6 +89,8 @@ def sfv(sfvPath):
         missing = os.path.join(os.path.dirname(sfvPath), missingStyle.format(kv[0]))
         with open(missing, "w") as m:
             m.write(kv[1])
+
+    show(sfvPath)
 
 
 def file(filePath):
@@ -128,4 +124,4 @@ def file(filePath):
             b.write(hashList)
         os.remove(filePath)
 
-    show(os.path.dirname(filePath))
+    show(filePath)
