@@ -13,6 +13,8 @@ baseDir = os.path.dirname(os.path.abspath(__file__))
 config = configparser.ConfigParser()
 config.read(os.path.join(baseDir, "../config.ini"))
 
+tmpFileName = str(".prosfvd-tmp")
+
 missingStyle = str(config.get("style", "missing"))
 brokenStyle = str(config.get("style", "broken"))
 statusStyle = str(config.get("style", "status"))
@@ -60,17 +62,18 @@ def getFormattedStatus(cntTotal, cntMissing, cntBroken):
 
 def show(filePath):
     log.debug("showing status in: '" + os.path.dirname(filePath) + "'")
+
     cntTotal = 0
     cntMissing = 0
     cntBroken = 0
+
     sfv = parseSfv(filePath)
+    working = os.path.dirname(filePath)
 
     for key in sfv.keys():
         tmp = os.path.join(os.path.dirname(filePath), key)
         missing = getFormattedMissing(tmp)
         broken = getFormattedBroken(tmp)
-
-        log.debug("missing: " + missing + " exists: " + str(os.path.exists(missing)))
 
         if os.path.exists(missing):
             cntMissing += 1
@@ -79,7 +82,16 @@ def show(filePath):
 
         cntTotal += 1
 
-    log.debug(getFormattedStatus(cntTotal, cntMissing, cntBroken))
+    statusFormatted = getFormattedStatus(cntTotal, cntMissing, cntBroken)
+    tmpFile = os.path.join(working, tmpFileName)
+
+    if os.path.exists(tmpFile):
+        with open(tmpFile, "r") as tF:
+            os.rmdir(os.path.join(working, tF.readline()))
+
+    with open(tmpFile, "w") as tF:
+        tF.write(statusFormatted)
+        os.mkdir(os.path.join(working, statusFormatted))
 
 
 def sfv(sfvPath):
@@ -95,17 +107,19 @@ def sfv(sfvPath):
 
 def file(filePath):
     log.debug("processing file: '{0}' - '{1}'".format(filePath, str(os.path.basename(filePath))))
-
     sfv = parseSfv(filePath)
 
+    if not sfv:
+        log.debug("no sfv found at '{0}' - skipping...".format(os.path.basename(filePath)))
+        return
+
     if not str(os.path.basename(filePath)) in sfv:
-        log.debug("file '{0}' not in sfv".format(os.path.basename(filePath)))
+        log.debug("file '{0}' not in sfv - skipping...".format(os.path.basename(filePath)))
         return
 
     # get hashes
     hashCalc = crc32(filePath).strip()
     hashList = sfv.get(os.path.basename(filePath))
-    log.debug(str("calculated hash: '{0}' - given hash: '{1}'").format(hashCalc, hashList))
 
     # init missing-file and broken-file
     missing = getFormattedMissing(filePath)

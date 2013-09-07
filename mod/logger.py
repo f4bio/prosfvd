@@ -1,15 +1,17 @@
 import logging
 import os
+
 __author__ = "ft2011@gmail.com"
+
 
 def getLogger(name, level):
     ## logging
     # http://docs.python.org/3/howto/logging.html#configuring-logging
     baseDir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-    fileName = name+".log"
+    fileName = name + ".log"
     filePath = os.path.join(baseDir, "logs")
 
-    logger = logging.getLogger("Log - "+name)
+    logger = logging.getLogger("Log - " + name)
     logger.setLevel(level)
 
     if not os.path.exists(filePath):
