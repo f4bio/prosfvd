@@ -54,18 +54,22 @@ def daemon(pipe):
         while running:
             with open(pipe, "r") as p:
                 newFifo = p.readline()
-                # log.debug("new fifo entry: " + newFifo)
-                fifoSplit = newFifo.split(" ")
-                log.debug(fifoSplit)
+                fifoSplit = newFifo.split("#")
+                log.debug(os.path.normpath(ftpBase + fifoSplit[1]))
 
                 if fifoSplit[0] == "STOR":
-                    path = os.path.abspath(fifoSplit[2].strip())
+                    # STOR /TV-XViD/00_P2P/Stargate.Atlantis/shepardS05_013.rar
+                    path = os.path.join(ftpBase, fifoSplit[1].strip())
 
                     log.debug("new file stored: '" + path + "'")
 
                 elif fifoSplit[0] == "SITE SFV":
+                    # SITE SFV /TV-XViD/00_P2P/Stargate.Atlantis
+                    path = os.path.join(ftpBase, fifoSplit[1].strip())
 
-                    log.debug("new site command issued: '" + fifoSplit + "'")
+                    # 1) search sfv in dir
+                    # 2) add to queue
+                    log.debug("rechecking: '" + path + "'")
 
                     # args = fifoSplit[1].strip()
                     #
