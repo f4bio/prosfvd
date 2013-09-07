@@ -7,12 +7,13 @@ import sys
 import queue
 import threading
 import configparser
+import fnmatch
 ## own imports
-from mod.fileHandler import processSfv, processFile, processFolder
+from mod.handle import sfv, file, folder
 from mod import logger
 
 ## constants:
-__author__ = "ft (ft@secure.la))"
+__author__ = "ft2011@gmail.com"
 baseDir = os.path.dirname(os.path.abspath(__file__))
 
 ## config
@@ -36,11 +37,11 @@ def worker():
         baseDir = os.path.dirname(entry)
         name, ext = os.path.splitext(entry)
         if ext.lower() == ".sfv":
-            processSfv(baseDir, entry)
+            sfv(baseDir, entry)
         elif os.path.isdir(entry):
-            processFolder(entry)
+            folder(entry)
         else:
-            processFile(baseDir, entry)
+            file(baseDir, entry)
         que.task_done()
 
 
@@ -55,32 +56,31 @@ def daemon(pipe):
             with open(pipe, "r") as p:
                 newFifo = p.readline()
                 fifoSplit = newFifo.split("#")
-                log.debug(os.path.normpath(ftpBase + fifoSplit[1]))
+                log.debug(newFifo)
+
+                if len(fifoSplit) != 2:
+                    log.debug("not enough parameters, skipping...")
+                    continue
+
+                tmp = (ftpBase + fifoSplit[1]).strip();
+                path = os.path.normpath(tmp)
 
                 if fifoSplit[0] == "STOR":
                     # STOR /TV-XViD/00_P2P/Stargate.Atlantis/shepardS05_013.rar
-                    path = os.path.join(ftpBase, fifoSplit[1].strip())
-
                     log.debug("new file stored: '" + path + "'")
+                    que.put(path)
 
                 elif fifoSplit[0] == "SITE SFV":
                     # SITE SFV /TV-XViD/00_P2P/Stargate.Atlantis
-                    path = os.path.join(ftpBase, fifoSplit[1].strip())
-
-                    # 1) search sfv in dir
-                    # 2) add to queue
                     log.debug("rechecking: '" + path + "'")
 
-                    # args = fifoSplit[1].strip()
-                    #
-                    # if fifoSplit[0].lower() == "site sfv":
-                    #     args = args.split(" ")
-                    #     if args[0].lower() == "tsfv":
-                    #         log.debug("adding to queue for recheck...")
-                    #         que.put(path)
-                    # else:
-                    #     log.debug("adding to queue...")
-                    #     que.put(os.path.join(path, args))
+                    for root, dirs, files in os.walk(path):
+                        for name in files:
+                            if fnmatch.fnmatch(name, "*.sfv"):
+                                result = os.path.join(root, name)
+                                log.debug("sfv found: '" + result + "'")
+                                que.put(result)
+
 
     except:
         log.debug("Unexpected error in daemon loop: " + str(sys.exc_info()[0]))

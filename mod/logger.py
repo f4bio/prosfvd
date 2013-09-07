@@ -1,6 +1,6 @@
 import logging
 import os
-__author__ = 'ft2011 (teeee))'
+__author__ = "ft2011@gmail.com"
 
 def getLogger(name, level):
     ## logging

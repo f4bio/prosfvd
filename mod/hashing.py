@@ -1,5 +1,7 @@
 import zlib
-__author__ = 'ft2011 (teeee))'
+
+__author__ = "ft2011@gmail.com"
+
 
 def crc32(fileName):
     prev = 0
