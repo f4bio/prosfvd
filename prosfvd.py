@@ -9,7 +9,7 @@ import threading
 import configparser
 import fnmatch
 ## own imports
-from mod.handle import sfv, file, folder
+from mod.handle import sfv, file
 from mod import logger
 
 ## constants:
@@ -79,6 +79,7 @@ def daemon(pipe):
                                 result = os.path.join(root, name)
                                 log.debug("sfv found: '" + result + "'")
                                 que.put(result)
+                                break
 
 
     except:
