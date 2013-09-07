@@ -61,7 +61,7 @@ def daemon(pipe):
                     log.debug("not enough parameters, skipping...")
                     continue
 
-                tmp = (ftpBase + fifoSplit[1]).strip();
+                tmp = (ftpBase + fifoSplit[1]).strip()
                 path = os.path.normpath(tmp)
 
                 if fifoSplit[0] == "STOR":
