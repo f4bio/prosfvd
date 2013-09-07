@@ -65,12 +65,12 @@ def daemon(pipe):
                 path = os.path.normpath(tmp)
 
                 if fifoSplit[0] == "STOR":
-                    # STOR /TV-XViD/00_P2P/Stargate.Atlantis/shepardS05_013.rar
+                    # STOR /relative/data/path/file.rar
                     log.debug("new file stored: '" + path + "'")
                     que.put(path)
 
                 elif fifoSplit[0] == "SITE SFV":
-                    # SITE SFV /TV-XViD/00_P2P/Stargate.Atlantis
+                    # SITE SFV /relative/data/path
                     log.debug("rechecking: '" + path + "'")
 
                     for root, dirs, files in os.walk(path):
