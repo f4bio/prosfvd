@@ -28,7 +28,7 @@ now = time.localtime()
 fifoPipe = os.path.abspath(config.get("io", "fifoPipe"))
 ftpBase = os.path.abspath(config.get("io", "ftpBase"))
 logLevel = config.get("log", "level")
-log = logger.getLogger("prosfvd.py", logLevel)
+log = logger.getLogger(__file__, logLevel)
 que = queue.Queue()
 running = True
 
