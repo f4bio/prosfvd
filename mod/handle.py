@@ -6,14 +6,13 @@ from mod import logger
 ## vars
 from mod.hashing import crc32
 
-__author__ = "ft2011@gmail.com"
 baseDir = os.path.dirname(os.path.abspath(__file__))
 
 ## config
 config = configparser.ConfigParser()
 config.read(os.path.join(baseDir, "../config.ini"))
 
-tmpFileName = str(".prosfvd-tmp")
+tmpFileName = str(".prosfvd.py-tmp")
 
 missingStyle = str(config.get("style", "missing"))
 brokenStyle = str(config.get("style", "broken"))

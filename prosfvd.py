@@ -13,7 +13,10 @@ from mod.handle import sfv, file
 from mod import logger
 
 ## constants:
-__author__ = "ft2011@gmail.com"
+__author__ = "ft"
+__email__ = "ft2011@gmail.com"
+__version__ = "1.0"
+
 baseDir = os.path.dirname(os.path.abspath(__file__))
 
 ## config
@@ -25,7 +28,7 @@ now = time.localtime()
 fifoPipe = os.path.abspath(config.get("io", "fifoPipe"))
 ftpBase = os.path.abspath(config.get("io", "ftpBase"))
 logLevel = config.get("log", "level")
-log = logger.getLogger("prosfvd", logLevel)
+log = logger.getLogger("prosfvd.py", logLevel)
 que = queue.Queue()
 running = True
 

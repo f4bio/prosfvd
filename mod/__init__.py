@@ -1,1 +1,0 @@
-__author__ = "ft2011@gmail.com"
