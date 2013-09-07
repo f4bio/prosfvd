@@ -34,14 +34,14 @@ def worker():
     working = True
     while working:
         entry = que.get()
-        baseDir = os.path.dirname(entry)
         name, ext = os.path.splitext(entry)
+
         if ext.lower() == ".sfv":
-            sfv(baseDir, entry)
-        elif os.path.isdir(entry):
-            folder(entry)
+            sfv(entry)
+        elif os.path.isfile(entry):
+            file(entry)
         else:
-            file(baseDir, entry)
+            log.error("something went wrong... (neither sfv nor file?!)")
         que.task_done()
 
 
@@ -56,7 +56,6 @@ def daemon(pipe):
             with open(pipe, "r") as p:
                 newFifo = p.readline()
                 fifoSplit = newFifo.split("#")
-                log.debug(newFifo)
 
                 if len(fifoSplit) != 2:
                     log.debug("not enough parameters, skipping...")

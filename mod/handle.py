@@ -13,17 +13,22 @@ config.read(os.path.join(baseDir, "../config.ini"))
 
 ## system:
 logLevel = config.get("log", "level")
-log = logger.getLogger("fileHandler", logLevel)
+log = logger.getLogger("handle", logLevel)
 
 
-def sfv(baseDir, fileName):
-    sfvFile = os.path.join(baseDir, fileName)
-    log.debug("processing sfv: '" + sfvFile + "'")
+def sfv(sfvPath):
+    log.debug("processing sfv: '" + sfvPath + "'")
+    with open(sfvPath, "r") as sp:
+        for line in sp.readlines():
+            fileName, crcValue = line.split(" ")
+
+            missing = os.path.join(os.path.dirname(sfvPath), fileName + "-MiSSiNG")
+            with open(missing, "w") as m:
+                m.write(crcValue)
+
+def file(filePath):
+    log.debug("processing file: '" + filePath + "'")
 
 
-def file(baseDir, fileName):
-    log.debug("processing file: '" + fileName + "'")
-
-
-def folder(dirName):
-    log.debug("processing folder: '" + dirName + "'")
+def folder(folderPath):
+    log.debug("processing folder: '" + folderPath + "'")
